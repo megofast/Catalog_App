@@ -1,0 +1,46 @@
+{% if user %}
+  {% extends "secure_base.html" %}
+  {% block photo %}
+    {{ user['picture'] }}
+  {% endblock %}
+  {% block user %}
+    <h5 id="username">{{ user['username'] }}</h5>
+  {% endblock %}
+{% else %}
+  {% extends "base.html" %}
+{% endif %}
+{% block map %}
+  <a href="{{ url_for('catalog') }}">Catalog</a>&nbsp;|&nbsp;
+  <a href="{{ url_for('showCategory', category = item.category.name) }}">{{ item.category.name }}</a>&nbsp;|&nbsp;
+  <a href="{{ url_for('editItem', item_id = item.id) }}">Edit Item</a>
+{% endblock %}
+{% block content %}
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+      {% for message in messages %}
+      <li><strong>{{ message }}</strong></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    <div class="wrapper width50">
+      <h1>New Item</h1>
+      <form action="{{ url_for('editItem', item_id = item.id)}}"
+      method='post'>
+        <input type='text' size='30' name='name' placeholder='{{ item.name }}'>
+        <textarea name='desc' rows='3' cols='20'>{{ item.description }}</textarea>
+        <select name='category'>
+          {% for category in categories %}
+            {% if category.name == item.category.name %}
+              <option value='{{ category.name }}' selected>{{ category.name }}</option>
+            {% else %}
+              <option value='{{ category.name }}'>{{ category.name }}</option>
+            {% endif %}
+          {% endfor %}
+        </select>
+        <input class="button" type='submit' value="Edit">
+      </form>
+      <a class="button" href = "{{ url_for('showDetails', item_id = item.id) }}">Cancel</a>
+    </div>
+{% endblock %}

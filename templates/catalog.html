@@ -1,0 +1,47 @@
+{% if user %}
+  {% extends "secure_base.html" %}
+  {% block photo %}
+    {{ user['picture'] }}
+  {% endblock %}
+  {% block user %}
+    <h5 id="username">{{ user['username'] }}</h5>
+  {% endblock %}
+{% else %}
+  {% extends "base.html" %}
+{% endif %}
+{% block map %}
+  <a href="{{ url_for('catalog') }}">Catalog</a>
+{% endblock %}
+
+{% block content %}
+  <div class="wrapper">
+    <div class="column1">
+      <h4 class="col_headers">Categories</h4>
+    {% for category in categories %}
+      <div id="category_container">
+        <span id="category">
+          {% if selected == category.name %}
+            <h5 id="cat_selected"><a href="{{ url_for('showCategory', category = category.name) }}">{{ category.name }}&nbsp;({{ totals[loop.index0] }})</a></h5>
+          {% else %}
+            <h5 id="cat_unselected"><a href="{{ url_for('showCategory', category = category.name) }}">{{ category.name }}&nbsp;({{ totals[loop.index0] }})</a></h5>
+          {% endif %}
+        </span>
+        {% if user %}
+          {% if user['username'] == category.user.name %}
+          <span class="right small_links">
+            <a href="{{ url_for('editCategory', category = category.name) }}">Edit</a>&nbsp;|&nbsp;
+            <a href="{{ url_for('deleteCategory', category = category.name) }}">Delete</a>
+          </span>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endfor %}
+    </div>
+    <div class="column2">
+      <h4 class="col_headers">{{ selected }} Items</h4>
+    {% for item in items %}
+      <h6><p><a href="{{ url_for('showDetails', item_id = item.id)}}">{{ item.name }}</a></p></h6>
+    {% endfor %}
+    </div>
+  </div>
+{% endblock %}

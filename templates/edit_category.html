@@ -1,0 +1,35 @@
+{% if user %}
+  {% extends "secure_base.html" %}
+  {% block photo %}
+    {{ user['picture'] }}
+  {% endblock %}
+  {% block user %}
+    <h5 id="username">{{ user['username'] }}</h5>
+  {% endblock %}
+{% else %}
+  {% extends "base.html" %}
+{% endif %}
+{% block map %}
+  <a href="{{ url_for('catalog') }}">Catalog</a>&nbsp;|&nbsp;
+  <a href="{{ url_for('editCategory', category = category) }}">Edit Category</a>
+{% endblock %}
+{% block content %}
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+      {% for message in messages %}
+      <li><strong>{{ message }}</strong></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+    <div class="wrapper width50">
+      <h1>Edit Category</h1>
+      <form action="{{ url_for('editCategory', category = category)}}" method='POST'>
+        <label for="name">name: </label>
+        <input type='text' size='30' name='name' placeholder='{{ category }}' />
+        <input class="button" type='submit' value="Edit" />
+      </form>
+      <a class="button" href = "{{ url_for('catalog') }}">Cancel</a>
+    </div>
+{% endblock %}

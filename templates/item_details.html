@@ -1,0 +1,31 @@
+{% if user %}
+  {% extends "secure_base.html" %}
+  {% block photo %}
+    {{ user['picture'] }}
+  {% endblock %}
+  {% block user %}
+    <h5 id="username">{{ user['username'] }}</h5>
+  {% endblock %}
+{% else %}
+  {% extends "base.html" %}
+{% endif %}
+{% block map %}
+  <a href="{{ url_for('catalog') }}">Catalog</a>&nbsp;|&nbsp;
+  <a href="{{ url_for('showCategory', category = item.category.name) }}">{{ item.category.name }}</a>&nbsp;|&nbsp;
+  <a>{{ item.name }}</a>
+{% endblock %}
+
+{% block content %}
+  <div class="wrapper width50">
+    <h1>{{ item.name }}</h1>
+    <p>{{ item.description }}</p>
+    <a class="button left" href="{{ url_for('catalog') }}">Back</a>
+    {% if user %}
+      {% if user['username'] == item.user.name %}
+        <span class="right">
+          <a class="small_links" href="{{ url_for('editItem', item_id = item.id) }}">Edit</a>&nbsp;|&nbsp;<a class="small_links" href="{{ url_for('deleteItem', item_id = item.id) }}">Delete</a>
+        </span>
+      {% endif %}
+    {% endif %}
+  </div>
+{% endblock %}

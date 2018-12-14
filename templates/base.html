@@ -1,0 +1,38 @@
+<html>
+<head>
+  <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header>
+    <div class="title_bar">
+      <span id="title"><h1><a href="{{ url_for('catalog') }}">Catalog App</a></h1></span>
+      <span id="user">
+        <span id="span_image">
+          <img src="{{ url_for('static', filename='generic_user.png')}}" id="user_photo" />
+        </span>
+        <span id="span_login">
+          <span class="button"><a href="{{ url_for('showLogin') }}">Login</a></span>
+        </span>
+      </span>
+    </div>
+    <div class="header_bar">
+      <span id="add_data_bar">
+        <h6 class="add_links"><a href="{{ url_for('newCategory') }}">* Please login to add items. *</a></h6>
+      </span>
+      <span class="right map">{% block map %}{% endblock %}</span>
+    </div>
+  </header>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+  <ul>
+    {% for message in messages %}
+    <li><strong>{{ message }}</strong></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+
+</body>
+</html>

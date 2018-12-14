@@ -1,0 +1,34 @@
+{% if user %}
+  {% extends "secure_base.html" %}
+  {% block photo %}
+    {{ user['picture'] }}
+  {% endblock %}
+  {% block user %}
+    <h5 id="username">{{ user['username'] }}</h5>
+  {% endblock %}
+{% else %}
+  {% extends "base.html" %}
+{% endif %}
+{% block map %}
+  <a href="{{ url_for('catalog') }}">Catalog</a>&nbsp;|&nbsp;
+  <a href="{{ url_for('showCategory', category = item.category.name) }}">{{ item.category.name}}</a>&nbsp;|&nbsp;
+  <a href="{{ url_for('deleteItem', item_id = item.id) }}">Delete Item</a>
+{% endblock %}
+{% block content %}
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<ul>
+  {% for message in messages %}
+  <li><strong>{{ message }}</strong></li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+<div class="wrapper width50">
+  <h1> Are you sure you want to delete {{ item.name }}? </h1>
+  <form action='{{ url_for('deleteItem', item_id = item.id) }}' method = 'POST'>
+    <input class="button" type='submit', value = 'Delete'>
+  </form>
+  <a class="button" href = "{{ url_for('showDetails', item_id = item.id) }}">Cancel</a>
+</div>
+{% endblock %}
