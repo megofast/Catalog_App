@@ -1,3 +1,15 @@
+#!/usr/bin/env python2
+
+"""This module will create a web server that will serve http endpoints to
+create, edit, and delete items and categories within a catalog environment.
+
+Note: This module requires the models.py.
+"""
+
+import random
+import string
+import json
+import requests
 from flask import Flask, render_template, request, redirect
 from flask import url_for, flash, jsonify, make_response
 from sqlalchemy import create_engine
@@ -7,10 +19,6 @@ from flask import session as login_session
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 import httplib2
-import random
-import string
-import json
-import requests
 
 app = Flask(__name__)
 
@@ -28,6 +36,7 @@ user_data = {}
 
 @app.route('/login')
 def showLogin():
+    """This endpoint will show the login page."""
     # Create a state token
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
                     for x in xrange(32))
@@ -37,6 +46,7 @@ def showLogin():
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """This endpoint will connect a Google users account and login."""
     # Validate state token
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
@@ -104,11 +114,8 @@ def gconnect():
 
     # Get user info
     userinfo_url = "https://www.googleapis.com/oauth2/v2/userinfo"
-
     params = {'access_token': credentials.access_token, 'alt': 'json'}
-
     answer = requests.get(userinfo_url, params=params)
-
     data = answer.json()
 
     login_session['username'] = data['name']
@@ -140,6 +147,7 @@ def gconnect():
 
 @app.route('/gdisconnect')
 def gdisconnect():
+    """This endpoint will disconnect a connected Google user."""
     # Only disconnect a connected user
     access_token = login_session.get('access_token')
     if access_token is None:
@@ -174,13 +182,8 @@ def gdisconnect():
         return redirect(url_for('catalog'))
 
 
-def getUserInfo(user_id):
-    session = DBSession()
-    user = session.query(User).filter_by(email=login_session['email']).one()
-    return user.id
-
-
 def getUserID(email):
+    """This function will use the supplied email to return the user id."""
     session = DBSession()
     try:
         user = session.query(User).filter_by(email=email).one()
@@ -190,6 +193,9 @@ def getUserID(email):
 
 
 def createUser(login_session):
+    """This function will create a user in the database using the supplied
+    username, email, and picture url from the login session.
+    """
     session = DBSession()
     newUser = User(name=login_session['username'],
                    email=login_session['email'],
@@ -202,7 +208,7 @@ def createUser(login_session):
 
 @app.route('/catalog')
 def catalog():
-    # This is the endpoint to show the itemscatalog
+    """This endpoint will show the main catalog, including recent items."""
     session = DBSession()
     category_list = session.query(Category).all()
     # loop through category list and get total items in each category
@@ -212,7 +218,7 @@ def catalog():
         category_totals.append(session.query(Item).filter_by(
                                category=cat).count())
 
-    recent_items = session.query(Item).order_by(Item.id.desc()).limit(3).all()
+    recent_items = session.query(Item).order_by(Item.id.desc()).limit(5).all()
 
     if 'username' not in login_session:
         return render_template('catalog.html', categories=category_list,
@@ -227,6 +233,7 @@ def catalog():
 
 @app.route('/catalog/category', methods=['GET', 'POST'])
 def newCategory():
+    """This endpoint creates a new category."""
     # Check to see if the user is logged in or not
     if 'username' not in login_session:
         flash('You must be logged in to create a category.')
@@ -260,7 +267,7 @@ def newCategory():
 
 @app.route('/catalog/category/<string:category>')
 def showCategory(category):
-    # This is the endpoint to show the itemscatalog for specific category
+    """This is the endpoint for showing items for a specific category."""
     session = DBSession()
     category = session.query(Category).filter_by(name=category).one()
     category_list = session.query(Category).all()
@@ -283,7 +290,7 @@ def showCategory(category):
 
 @app.route('/catalog/category/<string:category>/edit', methods=['GET', 'POST'])
 def editCategory(category):
-    # This method is for editing a category
+    """This endpoint is for editing the specified category."""
     if 'username' not in login_session:
         flash('You must be logged in to edit a category.')
         return redirect(url_for('catalog'))
@@ -315,6 +322,7 @@ def editCategory(category):
 @app.route('/catalog/category/<string:category>/delete',
            methods=['GET', 'POST'])
 def deleteCategory(category):
+    """This endpoint will delete the specified category."""
     if 'username' not in login_session:
         # The user is not logged in and cannot delete Categories
         flash('You must be logged in to delete categories.')
@@ -345,10 +353,9 @@ def deleteCategory(category):
 
 @app.route('/catalog/item/<int:item_id>')
 def showDetails(item_id):
+    """This endpoint will show the details of the specified item."""
     session = DBSession()
-
     item = session.query(Item).filter_by(id=item_id).one()
-
     if 'username' not in login_session:
         return render_template('item_details.html', item=item)
     else:
@@ -358,12 +365,14 @@ def showDetails(item_id):
 
 @app.route('/catalog/item', methods=['GET', 'POST'])
 def newItem():
+    """This endpoint will create a new item."""
     # Check to see if the user is logged in, if not redirect to login page
     if 'username' not in login_session:
         flash('You must be logged in to add items to the catalog.')
         return redirect('/login')
     session = DBSession()
     if request.method == 'POST':
+        # The form must contain a name
         if request.form['name']:
             category = session.query(Category).filter_by(
                 name=request.form['category']).one()
@@ -390,6 +399,7 @@ def newItem():
 
 @app.route('/catalog/item/<int:item_id>/edit', methods=['GET', 'POST'])
 def editItem(item_id):
+    """This endpoint will edit the specified item."""
     # Check to see if the user is logged in, if not redirect to login page
     if 'username' not in login_session:
         flash('You must be logged in to edit items in the catalog.')
@@ -397,6 +407,7 @@ def editItem(item_id):
     session = DBSession()
     item = session.query(Item).filter_by(id=item_id).one()
     if item.user.name == login_session['username']:
+        # The user owns this item, proceed with edit
         if request.method == 'POST':
             if request.form['name']:
                 category = session.query(Category).filter_by(
@@ -425,6 +436,7 @@ def editItem(item_id):
 
 @app.route('/catalog/item/<int:item_id>/delete', methods=['GET', 'POST'])
 def deleteItem(item_id):
+    """The endpoint will delete the specified item."""
     if 'username' not in login_session:
         # The user is not logged in and cannot delete Categories
         flash('You must be logged in to delete items.')
@@ -451,6 +463,7 @@ def deleteItem(item_id):
 # JSON api endpoints
 @app.route('/catalog/category/JSON')
 def categoriesJSON():
+    """This endpoint will return JSON for all the categories."""
     session = DBSession()
     categories = session.query(Category).all()
     return jsonify(Categories=[cat.serialize for cat in categories])
@@ -458,6 +471,7 @@ def categoriesJSON():
 
 @app.route('/catalog/category/<string:category>/JSON')
 def categoryJSON(category):
+    """This endpoint will return JSON for items from a specific category"""
     session = DBSession()
     cat = session.query(Category).filter_by(name=category).one()
     items = session.query(Item).filter_by(category=cat).all()
@@ -466,6 +480,7 @@ def categoryJSON(category):
 
 @app.route('/catalog/category/<string:category>/<int:item_id>/JSON')
 def itemJSON(category, item_id):
+    """This endpoint will return JSON for a specific item."""
     session = DBSession()
     item = session.query(Item).filter_by(id=item_id).one()
     return jsonify(Item=item.serialize)

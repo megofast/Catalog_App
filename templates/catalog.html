@@ -40,7 +40,12 @@
     <div class="column2">
       <h4 class="col_headers">{{ selected }} Items</h4>
     {% for item in items %}
-      <h6><p><a href="{{ url_for('showDetails', item_id = item.id)}}">{{ item.name }}</a></p></h6>
+      {% if selected == 'Recently Added' %}
+        <h6 class="item"><a href="{{ url_for('showDetails', item_id = item.id) }}">{{ item.name }}</a></h6>
+          <p class="cat"><a href="{{ url_for('showCategory', category = item.category.name) }}">&nbsp;({{ item.category.name }})</a></p><br/>
+      {% else %}
+        <h6><a href="{{ url_for('showDetails', item_id = item.id)}}">{{ item.name }}</a></h6>
+      {% endif %}
     {% endfor %}
     </div>
   </div>

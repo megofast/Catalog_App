@@ -1,3 +1,7 @@
+"""This module creates classes to represent the database structure for the
+itemscatalog databaseself.
+"""
+
 import os
 import sys
 from sqlalchemy import Column, ForeignKey, Integer, String
