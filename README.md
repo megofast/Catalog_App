@@ -1,7 +1,7 @@
 # Catalog_App
 A Python web application that allows a logged in user to create a catalog of categories and items.
 ## Requirements
-- Python 3
+- Python 2
 - sqlalchemy
 - A Vagrant environment.
   - Included in this repo: vagrant_config.zip (includes python and sqlalchemy)
@@ -19,7 +19,7 @@ A Python web application that allows a logged in user to create a catalog of cat
 - Ensure all the requirements are met.
 - Navigate to the directory web_server.py is located in.
 - From the console type the following:
-    - `python3 web_server.py`
+    - `python web_server.py`
 
 ## Attributions
 - The vagrant_config.zip file is from Udacity's Full Stack Web Development Nanodegree.
