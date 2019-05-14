@@ -9,21 +9,21 @@
     <script src="//apis.google.com/js/platform.js"></script>
     <div id="signin" class="wrapper width50">
     <div id="signinButton">
-      <span class="g-signin"
+      <span class="g-signin2"
         data-scope="email"
         data-clientid="799419190469-cbn6bb2j6n8suu1imeeh57td24qhm6e9.apps.googleusercontent.com"
         data-redirecturi="postmessage"
         data-accesstype="offline"
         data-cookiepolicy="single_host_origin"
-        data-callback="signInCallback"
+        data-onsuccess="onSignIn"
+        data-onfailure="onSignInFailure"
         data-approvalprompt="force">
       </span>
     </div>
     </div>
     <div id="result"></div>
     <script>
-      function signInCallback(authResult) {
-        if (authResult['code']) {
+      function onSignIn() {
           // Hide the sign-in button now that the user is authorize
           $('#signinButton').attr('style', 'display: none');
           $('#signin').attr('style', 'display: none');
@@ -40,14 +40,16 @@
                 setTimeout(function() {
                   window.location.href = "/catalog";
                 }, 4000);
-              } else if (authResult['error']) {
-                console.log('There was an error: ' + authResult['error']);
               } else {
                 $('#result').html('Failed to make a server-side call. Check your configuration and console.');
               }
             }
           });
-        }
+      }
+
+      function onSignInFailure() {
+        // Failed to login, alert the user
+        $('result').html('Failed to login, please try again later.');
       }
     </script>
 {% endblock %}
